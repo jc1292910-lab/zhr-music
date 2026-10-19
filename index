@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1a2e">
+<title>张函瑞音乐任务台</title>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --card: #1a1a2e;
+    --primary: #e94560;
+    --primary-hover: #ff6b81;
+    --text: #eaeaea;
+    --muted: #a0a0b0;
+    --success: #2ecc71;
+    --border: #2a2a40;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  header {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    padding: 20px 16px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  header p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+  }
+  .btn:active { background: var(--primary-hover); }
+  .btn-secondary {
+    background: #2a2a40;
+  }
+  .btn-secondary:active { background: #3a3a55; }
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    width: auto;
+  }
+  input, select, textarea {
+    width: 100%;
+    background: #12121f;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .task-list {
+    list-style: none;
+  }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-item input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+    accent-color: var(--primary);
+  }
+  .task-content {
+    flex: 1;
+  }
+  .task-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .task-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .task-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .link-btn {
+    font-size: 0.8rem;
+    color: var(--primary);
+    text-decoration: none;
+    padding: 4px 8px;
+    background: rgba(233, 69, 96, 0.15);
+    border-radius: 6px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .tab {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .hidden { display: none !important; }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 30px 0;
+    font-size: 0.95rem;
+  }
+  .footer-tip {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 20px;
+    padding: 0 16px;
+  }
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+  }
+  .modal-content {
+    background: var(--card);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-header h3 { font-size: 1.15rem; }
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>张函瑞 · 音乐任务台</h1>
+    <p>支持数据 · 记录进度 · 方便打榜</p>
+  </header>
+
+  <div class="container">
+    <!-- 统计 -->
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-num" id="totalTasks">0</div>
+        <div class="stat-label">总任务</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="doneTasks">0</div>
+        <div class="stat-label">已完成</div>
+      </div>
+    </div>
+
+    <!-- 标签切换 -->
+    <div class="tabs">
+      <div class="tab active" data-tab="tasks">今日任务</div>
+      <div class="tab" data-tab="songs">歌曲管理</div>
+      <div class="tab" data-tab="guide">活动向导</div>
+    </div>
+
+    <!-- 今日任务 -->
+    <div id="panel-tasks">
+      <div class="card">
+        <h2>📋 任务列表</h2>
+        <ul class="task-list" id="taskList">
+          <!-- 动态生成 -->
+        </ul>
+        <div class="empty" id="emptyTasks">暂无任务，去「歌曲管理」添加歌曲并生成任务吧</div>
+      </div>
+      <button class="btn" onclick="generateTodayTasks()">🔄 重新生成今日任务</button>
+    </div>
+
+    <!-- 歌曲管理 -->
+    <div id="panel-songs" class="hidden">
+      <div class="card">
+        <h2>🎵 我的歌曲</h2>
+        <ul class="task-list" id="songList"></ul>
+        <div class="empty" id="emptySongs">还没有添加歌曲</div>
+      </div>
+      <button class="btn" onclick="openAddSong()">＋ 添加歌曲</button>
+    </div>
+
+    <!-- 活动向导 -->
+    <div id="panel-guide" class="hidden">
+      <div class="card">
+        <h2>🧭 常用平台入口</h2>
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:12px;">点击下方按钮可快速跳转（需在手机上安装对应 App 效果更好）</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a class="btn" href="https://y.qq.com" target="_blank">QQ 音乐</a>
+          <a class="btn btn-secondary" href="https://music.163.com" target="_blank">网易云音乐</a>
+          <a class="btn btn-secondary" href="https://www.kugou.com" target="_blank">酷狗音乐</a>
+          <a class="btn btn-secondary" href="https://www.kuwo.cn" target="_blank">酷我音乐</a>
+        </div>
+      </div>
+      <div class="card">
+        <h2>💡 打榜小贴士</h2>
+        <ul style="padding-left:18px;color:var(--muted);font-size:0.9rem;">
+          <li style="margin-bottom:8px;">每天坚持完整听歌 + 收藏 + 评论</li>
+          <li style="margin-bottom:8px;">多平台同步支持效果更好</li>
+          <li style="margin-bottom:8px;">使用任务台记录进度，避免重复或遗漏</li>
+          <li>数据仅保存在本机，不会上传</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer-tip">数据仅保存在你的手机浏览器中 · 可添加到主屏幕方便使用</p>
+  </div>
+
+  <!-- 添加歌曲弹窗 -->
+  <div class="modal hidden" id="addSongModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>添加歌曲</h3>
+        <button class="close-btn" onclick="closeAddSong()">×</button>
+      </div>
+      <input type="text" id="songName" placeholder="歌曲名称（例如：Baby's Horizon）">
+      <input type="text" id="songArtist" placeholder="艺人（默认张函瑞）" value="张函瑞">
+      <input type="url" id="qqLink" placeholder="QQ音乐链接（可选）">
+      <input type="url" id="neteaseLink" placeholder="网易云链接（可选）">
+      <input type="url" id="kugouLink" placeholder="酷狗链接（可选）">
+      <button class="btn" onclick="saveSong()">保存歌曲</button>
+    </div>
+  </div>
+
+<script>
+  // ========== 数据管理 ==========
+  const STORAGE_KEY = 'zhr_music_tasks_v1';
+
+  function loadData() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { songs: [], tasks: [], lastDate: '' };
+    try { return JSON.parse(raw); } catch { return { songs: [], tasks: [], lastDate: '' }; }
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  let data = loadData();
+
+  // ========== 工具 ==========
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function updateStats() {
+    const total = data.tasks.length;
+    const done = data.tasks.filter(t => t.done).length;
+    document.getElementById('totalTasks').textContent = total;
+    document.getElementById('doneTasks').textContent = done;
+  }
+
+  // ========== 渲染 ==========
+  function renderTasks() {
+    const list = document.getElementById('taskList');
+    const empty = document.getElementById('emptyTasks');
+    list.innerHTML = '';
+
+    if (data.tasks.length === 0) {
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    data.tasks.forEach((task, idx) => {
+      const li = document.createElement('li');
+      li.className = 'task-item';
+      li.innerHTML = `
+        <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${idx})">
+        <div class="task-content">
+          <div class="task-title" style="${task.done ? 'text-decoration:line-through;opacity:0.6' : ''}">${task.title}</div>
+          <div class="task-meta">${task.song} · ${task.platform}</div>
+          <div class="task-actions">
+            ${task.link ? `<a class="link-btn" href="${task.link}" target="_blank">打开链接</a>` : ''}
+          </div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+    updateStats();
+  }
+
+  function renderSongs() {
+    const list = document.getElementById('songList');
+    const empty = document.getElementById('emptySongs');
+    list.innerHTML = '';
+
+    if (data.songs.length === 0) {
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    data.songs.forEach((song, idx) => {
+      const li = document.createElement('li');
+      li.className = 'task-item';
+      li.innerHTML = `
+        <div class="task-content">
+          <div class="task-title">${song.name}</div>
+          <div class="task-meta">${song.artist}</div>
+          <div class="task-actions">
+            <button class="btn btn-sm btn-secondary" onclick="deleteSong(${idx})">删除</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  // ========== 任务逻辑 ==========
+  function generateTodayTasks() {
+    const today = todayStr();
+    if (data.lastDate === today && data.tasks.length > 0) {
+      if (!confirm('今天已经生成过任务了，确定要重新生成吗？已完成的记录会保留对应歌曲状态。')) return;
+    }
+
+    const newTasks = [];
+    const platforms = [
+      { key: 'qq', name: 'QQ音乐', field: 'qqLink' },
+      { key: 'netease', name: '网易云', field: 'neteaseLink' },
+      { key: 'kugou', name: '酷狗', field: 'kugouLink' }
+    ];
+
+    data.songs.forEach(song => {
+      platforms.forEach(p => {
+        if (song[p.field]) {
+          newTasks.push({
+            title: `完整播放 + 收藏 + 评论`,
+            song: song.name,
+            platform: p.name,
+            link: song[p.field],
+            done: false
+          });
+        }
+      });
+      // 即使没有链接也生成一个通用任务
+      if (!song.qqLink && !song.neteaseLink && !song.kugouLink) {
+        newTasks.push({
+          title: `去各平台支持《${song.name}》`,
+          song: song.name,
+          platform: '多平台',
+          link: '',
+          done: false
+        });
+      }
+    });
+
+    data.tasks = newTasks;
+    data.lastDate = today;
+    saveData(data);
+    renderTasks();
+    alert('今日任务已生成！');
+  }
+
+  function toggleTask(idx) {
+    data.tasks[idx].done = !data.tasks[idx].done;
+    saveData(data);
+    renderTasks();
+  }
+
+  // ========== 歌曲管理 ==========
+  function openAddSong() {
+    document.getElementById('addSongModal').classList.remove('hidden');
+  }
+  function closeAddSong() {
+    document.getElementById('addSongModal').classList.add('hidden');
+    document.getElementById('songName').value = '';
+    document.getElementById('qqLink').value = '';
+    document.getElementById('neteaseLink').value = '';
+    document.getElementById('kugouLink').value = '';
+  }
+
+  function saveSong() {
+    const name = document.getElementById('songName').value.trim();
+    if (!name) { alert('请填写歌曲名称'); return; }
+
+    data.songs.push({
+      name,
+      artist: document.getElementById('songArtist').value.trim() || '张函瑞',
+      qqLink: document.getElementById('qqLink').value.trim(),
+      neteaseLink: document.getElementById('neteaseLink').value.trim(),
+      kugouLink: document.getElementById('kugouLink').value.trim()
+    });
+    saveData(data);
+    closeAddSong();
+    renderSongs();
+    // 自动切换到歌曲页
+    switchTab('songs');
+  }
+
+  function deleteSong(idx) {
+    if (!confirm('确定删除这首歌吗？')) return;
+    data.songs.splice(idx, 1);
+    saveData(data);
+    renderSongs();
+  }
+
+  // ========== 标签切换 ==========
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+
+    document.getElementById('panel-tasks').classList.toggle('hidden', tab !== 'tasks');
+    document.getElementById('panel-songs').classList.toggle('hidden', tab !== 'songs');
+    document.getElementById('panel-guide').classList.toggle('hidden', tab !== 'guide');
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // ========== 初始化 ==========
+  // 检查是否跨天，自动清空旧任务
+  if (data.lastDate && data.lastDate !== todayStr()) {
+    data.tasks = [];
+    data.lastDate = '';
+    saveData(data);
+  }
+
+  renderTasks();
+  renderSongs();
+  updateStats();
+</script>
+</body>
+</html>
